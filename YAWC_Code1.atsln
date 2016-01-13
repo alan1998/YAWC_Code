@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "YAWC_Code1", "YAWC_Code1.cproj", "{9366DC4A-2F66-4D3C-9092-6E17928536D7}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "GccQTouchThumb", "..\GccQTouchThumb\GccQTouchThumb.cproj", "{0B3356E1-621E-4AF4-90E5-97058023E1A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9366DC4A-2F66-4D3C-9092-6E17928536D7}.Debug|ARM.ActiveCfg = Debug|ARM
+		{9366DC4A-2F66-4D3C-9092-6E17928536D7}.Debug|ARM.Build.0 = Debug|ARM
+		{9366DC4A-2F66-4D3C-9092-6E17928536D7}.Release|ARM.ActiveCfg = Release|ARM
+		{9366DC4A-2F66-4D3C-9092-6E17928536D7}.Release|ARM.Build.0 = Release|ARM
+		{0B3356E1-621E-4AF4-90E5-97058023E1A7}.Debug|ARM.ActiveCfg = Debug|ARM
+		{0B3356E1-621E-4AF4-90E5-97058023E1A7}.Debug|ARM.Build.0 = Debug|ARM
+		{0B3356E1-621E-4AF4-90E5-97058023E1A7}.Release|ARM.ActiveCfg = Release|ARM
+		{0B3356E1-621E-4AF4-90E5-97058023E1A7}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
