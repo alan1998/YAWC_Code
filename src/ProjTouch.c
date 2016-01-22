@@ -283,11 +283,21 @@ void Sercom4Handler(uint8_t inst)
 	//
 	///* Read and mask interrupt flag register */
 	uint16_t interrupt_status = usart_hw->INTFLAG.reg;
+	interrupt_status &= usart_hw->INTENSET.reg;
 	if (interrupt_status & SERCOM_USART_INTFLAG_RXC) {
 		/* Read out the status code and mask away all but the 4 LSBs*/
 		uint8_t  error_code = (uint8_t)(usart_hw->STATUS.reg & SERCOM_USART_STATUS_MASK);
 		/* Check if an error has occurred during the receiving */
 		if (error_code) {
+			/* Check which error occurred */
+			if (error_code & SERCOM_USART_STATUS_FERR) 
+				usart_hw->STATUS.reg |= SERCOM_USART_STATUS_FERR;
+			else if (error_code & SERCOM_USART_STATUS_BUFOVF)
+				usart_hw->STATUS.reg |= SERCOM_USART_STATUS_BUFOVF;
+			else if (error_code & SERCOM_USART_STATUS_PERR)
+				usart_hw->STATUS.reg |= SERCOM_USART_STATUS_PERR;	
+			//Clear data ready by throwing it away
+			//uint16_t received_data = (usart_hw->DATA.reg & SERCOM_USART_DATA_MASK);	
 		}
 		else {
 			///* Read current packet from DATA register,
@@ -317,9 +327,9 @@ void configure_touch_usart(void)
 	}
 
 	_sercom_set_handler(4,Sercom4Handler);
-	usart_enable(&touch_usart_instance);
 	SercomUsart *const usart_hw = &(touch_usart_instance.hw->USART);
 	usart_hw->INTENSET.reg = SERCOM_USART_INTFLAG_RXC;
+	usart_enable(&touch_usart_instance);
 
 }
 

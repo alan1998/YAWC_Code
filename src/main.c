@@ -69,7 +69,9 @@ int main (void)
 	system_interrupt_enable(SYSTEM_INTERRUPT_SYSTICK);
 	system_interrupt_enable(SYSTEM_INTERRUPT_MODULE_ADC);
 	system_interrupt_enable((const enum system_interrupt_vector)SERCOM2_IRQn);
+#ifdef TOUCH_DEBUG_USART
 	system_interrupt_enable((const enum system_interrupt_vector)SERCOM4_IRQn);
+#endif
 //	system_interrupt_set_priority(SYSTEM_INTERRUPT_MODULE_ADC,SYSTEM_INTERRUPT_PRIORITY_LEVEL_1);
 	
 	SetMidiChannel(testChannel);
@@ -135,9 +137,11 @@ MIDI_STATE EvaluateIdle(void)
 			eRet = PENDING_KEY_NOTE_OFF;		
 		}
 	}
+#ifdef TOUCH_DEBUG_USART
 	else if(gSendTouchDebugData==1){
 		SendTouchRaw();
 	}
+#endif
 	return eRet;	
 }
 

@@ -27,6 +27,7 @@ typedef enum MIDI_STATE{
 //#define TOGGLE_DEBUG_TOUCH
 //#define TOGGLE_A2D
 
+// Define this to enable touch debug comms out of Sercom4
 #define TOUCH_DEBUG_USART
 
 #define MIDDLE_THUMB_NOTE	72
