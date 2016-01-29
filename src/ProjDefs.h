@@ -21,6 +21,7 @@ typedef enum MIDI_STATE{
 #define BREATH_ADC_DIV 10L
 //#define CHANGE_NOTES_AT_BREATH_LEVEL
 //#define TOUCH_CYCLE_GAP 6
+#define BITE_CYCLE_GAP	3
 
 //Exclusive defines for PB11 toggle debug
 #define TOGGLE_DEBUG_SYSTICK 

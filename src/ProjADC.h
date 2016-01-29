@@ -8,6 +8,8 @@
 
 #ifndef PROJADC_H_
 #define PROJADC_H_
+#define BREATH_CHAN_OFF 0
+#define MOUTH_CHAN_OFF	1
 
 void InitADC(void);
 void GetBaseBreathLevel(void);

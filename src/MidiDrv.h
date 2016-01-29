@@ -13,6 +13,8 @@
 #define MIDI_NOTE_OFF	0x80
 #define MIDI_CC			0xB0
 #define MIDI_BREATH_CC	0x02
+#define MIDI_EFFECT1_CC		12
+#define MIDI_PITCHBEND	0xE0 
 
 typedef struct MSG{
 	uint8_t b0;
@@ -38,6 +40,8 @@ void InitMidi(void);
 uint8_t SendMidiMessage(uint8_t Msg, uint8_t d0, uint8_t d1);
 void SetMidiChannel(uint8_t nChannel);
 void DecodeNote(uint16_t uState);
-uint8_t CalcBreathCC();
+uint8_t CalcBreathCC(void);
+uint16_t CalcBite(void);
+void SendModulation(uint16_t Mod);
 
 #endif /* MIDIDRV_H_ */

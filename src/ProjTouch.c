@@ -22,6 +22,7 @@ void touch_selfcap_measure_complete_callback( void );
 touch_ret_t lib_touch_sensors_init(void);
 void touch_configure_ptc_clock(void);
 touch_ret_t ConfigYAWCTouch(void);
+void Sercom4Handler(uint8_t inst);
 
 #ifdef TOUCH_DEBUG_USART
 void configure_touch_usart(void);

@@ -12,7 +12,8 @@
 
 struct adc_module adc_instance;
 
-extern uint16_t gAdc_val;
+extern uint16_t gAdc_Breath;
+extern uint16_t gAdc_Bite;
 extern uint16_t gThreshold;
 extern uint gSysTick;
 uint16_t gThreshold;
@@ -28,12 +29,16 @@ void InitADC(void)
 	
 	config.clock_source = GCLK_GENERATOR_3;
 	config.clock_prescaler = ADC_CLOCK_PRESCALER_DIV8;
-	config.positive_input = ADC_POSITIVE_INPUT_PIN19;
+	config.positive_input = ADC_POSITIVE_INPUT_PIN18;
 	config.accumulate_samples = ADC_AVGCTRL_SAMPLENUM_16_Val;
 	config.divide_result = ADC_DIVIDE_RESULT_DISABLE;
 	config.resolution = ADC_RESOLUTION_CUSTOM;
 	config.gain_factor = ADC_INPUTCTRL_GAIN_2X;
 	config.freerunning = true;
+	config.sample_length = 5;
+	config.pin_scan.inputs_to_scan = 2;
+	config.pin_scan.offset_start_scan = 0;
+	
 	
 	adc_init(&adc_instance,ADC,&config);
 	adc_enable(&adc_instance);
@@ -43,7 +48,21 @@ void InitADC(void)
 
 void ADC_Handler(void)
 {
-	gAdc_val = ADC->RESULT.reg;
+	
+	uint Pos = ADC->INPUTCTRL.reg;
+	Pos = (Pos >> 20) & 0xf;
+	switch(Pos)
+	{
+		case BREATH_CHAN_OFF:
+			gAdc_Breath = ADC->RESULT.reg;
+			break;
+		case MOUTH_CHAN_OFF:
+			gAdc_Bite = ADC->RESULT.reg;
+			break;
+		default:
+		break;
+	}
+	
 	ADC->INTFLAG.bit.RESRDY =1;
 
 	#ifdef TOGGLE_A2D
@@ -59,7 +78,7 @@ void GetBaseBreathLevel(void)
 	{
 		while(nNow == gSysTick)
 		{};
-		nSum += gAdc_val;
+		nSum += gAdc_Breath;
 		nNow == gSysTick;
 	}
 	gThreshold = (nSum >> 6);

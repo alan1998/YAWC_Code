@@ -18,8 +18,10 @@ extern uint uKeyState;
 volatile uint8_t gKeysNote;
 volatile uint8_t gLastNote;
 volatile uint8_t gLastBreath;
-extern uint16_t gAdc_val;
+extern uint16_t gAdc_Breath;
 extern uint16_t gThreshold;
+extern uint16_t gAdc_Bite;
+extern float	gFilterBite;
 
 //Circular buffer to place messages into
 #define BUFFMax 0x3f
@@ -141,9 +143,9 @@ void DecodeNote(uint16_t uState)
 		gKeysNote = 0;
 }
 
-uint8_t CalcBreathCC()
+uint8_t CalcBreathCC(void)
 {
-	int nTemp = gAdc_val-gThreshold;//  >> 9) & 0x7f;	
+	int nTemp = gAdc_Breath-gThreshold;//  >> 9) & 0x7f;	
 	if(nTemp < 0)
 		nTemp = 0;
 	else{
@@ -151,10 +153,37 @@ uint8_t CalcBreathCC()
 		nTemp /= BREATH_ADC_DIV;
 		nTemp = nTemp >> 9;
 		if(nTemp > 127)
-		nTemp = 127;
+			nTemp = 127;
 	}
 	gLastBreath = nTemp;
 	return gLastBreath;
+}
+
+#define AVE_CONST 0.08
+#define BITE_SCALE 0.01
+
+uint16_t CalcBite(void)
+{
+	float Val = (float)gAdc_Bite;
+	float PrevVal = gFilterBite;
+	gFilterBite = AVE_CONST * Val + (1-AVE_CONST) * gFilterBite;
+	Val = PrevVal - gFilterBite;
+	Val *= 0.7;
+	int uVal = (int)Val + 0x2000;
+//	uVal = uVal >> 9;
+	if(uVal > 0x3fff)
+		uVal = 0x2000;
+	if(uVal < 10)
+		uVal = 2000;
+	return uVal & 0xffff;
+}
+
+void SendModulation(uint16_t Mod)
+{
+	//Turn the 14bit value into correct message
+	uint8_t uLeast = Mod & 0x7f;
+	uint8_t uHigh = (Mod >> 7) & 0x7f;
+	SendMidiMessage(MIDI_PITCHBEND,uLeast, uHigh);
 }
 
 void InitMidi(void)

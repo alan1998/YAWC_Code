@@ -26,7 +26,10 @@ Buttons for touch recal and breath recal
 ////////////////////////////////////
 volatile uint8_t gDoEval = 0;
 volatile uint gSysTick = 0;
-volatile uint16_t gAdc_val;
+volatile uint16_t gAdc_Breath;
+volatile uint16_t gAdc_Bite;
+volatile float	  gFilterBite;
+volatile uint16_t	gBiteCount;
 extern volatile uint8_t gTouchBusy;
 extern volatile uint8_t gKeysNote;
 extern volatile uint8_t gLastNote;
@@ -45,7 +48,7 @@ MIDI_STATE EvaluateOnPendingKey(void);
 MIDI_STATE EvaluateNoteOn(void);
 MIDI_STATE EvaluatePendingKeyChange(void); 
 
-static	uint8_t testVel = 101;
+static	uint8_t testVel = 100;
 
 int main (void)
 {
@@ -124,7 +127,7 @@ int main (void)
 MIDI_STATE EvaluateIdle(void)
 {
 	MIDI_STATE eRet = IDLE;
-	if(gAdc_val > gThreshold){
+	if(gAdc_Breath > gThreshold){
 		//TODO factor this Note code with that below into a method
 		//TODO macro for testing note valid bit
 		if((gKeysNote & 0x80)	!= 0){
@@ -149,7 +152,7 @@ MIDI_STATE EvaluateIdle(void)
 MIDI_STATE EvaluateOnPendingKey(void)
 {
 	MIDI_STATE eRet = PENDING_KEY_NOTE_OFF;//ASSUME not changing
-	if(gAdc_val > gThreshold){
+	if(gAdc_Breath > gThreshold){
 		if((gKeysNote & 0x80)	!= 0){
 			SendMidiMessage(MIDI_NOTE_ON,gKeysNote & 0x7f,testVel);
 			gLastNote = gKeysNote & 0x7f;
@@ -166,8 +169,9 @@ MIDI_STATE EvaluateOnPendingKey(void)
 MIDI_STATE EvaluateNoteOn(void)
 {
 	MIDI_STATE eRet = NOTE_ON;
-	if(gAdc_val < gThreshold){
+	if(gAdc_Breath < gThreshold){
 		SendMidiMessage(MIDI_CC,MIDI_BREATH_CC,0);
+		SendModulation(0x2000);
 		if(SendMidiMessage(MIDI_NOTE_OFF,gLastNote,testVel)){
 			port_pin_set_output_level(LED_PIN,false);
 			eRet = IDLE;
@@ -181,6 +185,7 @@ MIDI_STATE EvaluateNoteOn(void)
 			#else
 			SendMidiMessage(MIDI_NOTE_ON,gKeysNote & 0x7f,testVel);
 			#endif
+			SendModulation(0x2000);
 			SendMidiMessage(MIDI_NOTE_OFF,gLastNote,gLastBreath);
 			gLastNote = gKeysNote & 0x7f;	
 		}
@@ -192,6 +197,11 @@ MIDI_STATE EvaluateNoteOn(void)
 		//Send breath
 		uint8_t val = CalcBreathCC();
 		SendMidiMessage(MIDI_CC,MIDI_BREATH_CC,val);
+		if(++gBiteCount > BITE_CYCLE_GAP){
+			uint16_t Mod = CalcBite();
+			SendModulation(Mod);
+			gBiteCount = 0;
+		}
 	}
 	return eRet;
 }
@@ -200,8 +210,9 @@ MIDI_STATE EvaluateNoteOn(void)
 MIDI_STATE EvaluatePendingKeyChange(void)
 {
 	MIDI_STATE eRet = PENDING_KEY_NOTE_ON;
-	if(gAdc_val < gThreshold){
+	if(gAdc_Breath < gThreshold){
 		SendMidiMessage(MIDI_CC,MIDI_BREATH_CC,0);
+		SendModulation(0x2000);
 		if(SendMidiMessage(MIDI_NOTE_OFF,gLastNote,testVel)){
 			port_pin_set_output_level(LED_PIN,false);
 			eRet = IDLE;
@@ -210,6 +221,7 @@ MIDI_STATE EvaluatePendingKeyChange(void)
 	else{
 		if((gKeysNote & 0x80) != 0){
 			//Already on new valid key combination
+			SendModulation(0x2000);
 			SendMidiMessage(MIDI_NOTE_ON,gKeysNote & 0x7f,testVel);
 			SendMidiMessage(MIDI_NOTE_OFF,gLastNote,testVel);
 			gLastNote = gKeysNote & 0x7f;
